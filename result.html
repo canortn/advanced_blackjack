@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blackjack Result</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to bottom right, #1e1e2f, #3a3a5a);
+            color: #ffffff;
+            font-family: 'Roboto Slab', serif;
+            text-align: center;
+            padding: 30px;
+        }
+        h1 {
+            font-size: 48px;
+            color: gold;
+            margin-bottom: 20px;
+        }
+        h2, h3 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        button {
+            background-color: gold;
+            border: none;
+            padding: 12px 24px;
+            font-size: 18px;
+            border-radius: 10px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .card-counts {
+            display: inline-block;
+            text-align: left;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>♠ Game Result ♣</h1>
+
+    <h2><strong>Your Hand:</strong> {{ player_hand }} (Total: {{ player_total }})</h2>
+    <h2><strong>Dealer's Hand:</strong> {{ dealer_hand }} (Total: {{ dealer_total }})</h2>
+    <h3><strong>Result:</strong> {{ result }}</h3>
+    <h3><strong>Your Balance:</strong> ${{ balance }}</h3>
+
+    <form action="{{ url_for('bet') }}" method="get">
+        <button type="submit">Play Again</button>
+    </form>
+
+    <h2>Card Counting</h2>
+    <div class="card-counts">
+        {% for card in card_counts %}
+            <div>{{ card }}: {{ total_card_counts[card] - card_counts[card] }} / {{ total_card_counts[card] }}</div>
+        {% endfor %}
+    </div>
+</body>
+</html>

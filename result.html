@@ -3,60 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <title>Blackjack Result</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(to bottom right, #1e1e2f, #3a3a5a);
-            color: #ffffff;
-            font-family: 'Roboto Slab', serif;
-            text-align: center;
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(to right, #232526, #414345);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             padding: 30px;
         }
-        h1 {
-            font-size: 48px;
-            color: gold;
-            margin-bottom: 20px;
+        .result-box {
+            background-color: rgba(255, 255, 255, 0.05);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            width: 600px;
         }
-        h2, h3 {
-            font-size: 28px;
-            margin-bottom: 10px;
-        }
-        button {
-            background-color: gold;
-            border: none;
-            padding: 12px 24px;
-            font-size: 18px;
-            border-radius: 10px;
+        .card {
+            display: inline-block;
             margin: 10px;
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 10px;
+        }
+        .btn {
+            background-color: #2196F3;
+            color: white;
+            padding: 12px 28px;
+            margin-top: 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
             cursor: pointer;
         }
-        .card-counts {
-            display: inline-block;
-            text-align: left;
+        .btn:hover {
+            background-color: #0b7dda;
+        }
+        .section-title {
+            font-size: 22px;
+            font-weight: 700;
             margin-top: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>♠ Game Result ♣</h1>
+    <div class="result-box">
+        <h1>{{ result }}</h1>
+        <p>Balance: ${{ balance }}</p>
 
-    <h2><strong>Your Hand:</strong> {{ player_hand }} (Total: {{ player_total }})</h2>
-    <h2><strong>Dealer's Hand:</strong> {{ dealer_hand }} (Total: {{ dealer_total }})</h2>
-    <h3><strong>Result:</strong> {{ result }}</h3>
-    <h3><strong>Your Balance:</strong> ${{ balance }}</h3>
-
-    <form action="{{ url_for('bet') }}" method="get">
-        <button type="submit">Play Again</button>
-    </form>
-
-    <h2>Card Counting</h2>
-    <div class="card-counts">
-        {% for card in card_counts %}
-            <div>{{ card }}: {{ total_card_counts[card] - card_counts[card] }} / {{ total_card_counts[card] }}</div>
+        <h2 class="section-title">Your Hand ({{ player_total }})</h2>
+        {% for card in player_hand %}
+            <div class="card">{{ card }}</div>
         {% endfor %}
+
+        <h2 class="section-title">Dealer's Hand ({{ dealer_total }})</h2>
+        {% for card in dealer_hand %}
+            <div class="card">{{ card }}</div>
+        {% endfor %}
+
+        <form action="/restart">
+            <button class="btn">Play Again</button>
+        </form>
     </div>
 </body>
 </html>

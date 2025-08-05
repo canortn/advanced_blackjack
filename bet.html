@@ -3,45 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <title>Place Your Bet</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600&display=swap" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(to bottom right, #2f1e2f, #5a3a5a);
-            color: #ffffff;
-            font-family: 'Roboto Slab', serif;
+            background-color: #2b2b3d;
+            color: white;
+            font-family: Arial, sans-serif;
             text-align: center;
-            padding: 30px;
+            padding-top: 50px;
         }
-        h1 {
-            font-size: 48px;
-            color: gold;
-            margin-bottom: 20px;
-        }
-        label, input {
-            font-size: 20px;
-            margin: 10px;
+        input[type="number"] {
+            padding: 10px;
+            font-size: 18px;
+            width: 120px;
+            border-radius: 6px;
+            border: none;
         }
         button {
-            background-color: gold;
-            border: none;
             padding: 12px 24px;
             font-size: 18px;
-            border-radius: 10px;
+            background-color: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 6px;
             margin-top: 20px;
             cursor: pointer;
+        }
+        button:hover {
+            background-color: #d35400;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <h1>Place Your Bet</h1>
+    <h2>Your Balance: ${{ balance }}</h2>
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
     <form method="POST">
         <label for="bet">Enter Bet Amount:</label>
-        <input type="number" name="bet" min="1" max="1000" required><br>
-        <button type="submit">Start Game</button>
+        <br><br>
+        <input type="number" name="bet" min="1" required>
+        <br><br>
+        <button type="submit">Deal Cards</button>
     </form>
-    {% if error %}
-        <p style="color: red; font-size: 18px;">{{ error }}</p>
-    {% endif %}
-    <p>Current Balance: {{ balance }}</p>
 </body>
 </html>

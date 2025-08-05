@@ -2,42 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome to Blackjack</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@600&display=swap" rel="stylesheet">
+    <title>Blackjack - Choose Decks</title>
     <style>
         body {
-            background: linear-gradient(to bottom right, #1f2f2f, #3a5a5a);
-            color: #ffffff;
-            font-family: 'Roboto Slab', serif;
+            background-color: #1f1f2e;
+            color: white;
+            font-family: Arial, sans-serif;
             text-align: center;
-            padding: 30px;
+            padding-top: 50px;
         }
-        h1 {
-            font-size: 50px;
-            color: gold;
-            margin-bottom: 30px;
-        }
-        label, input {
-            font-size: 20px;
-            margin: 10px;
+        input[type="number"] {
+            padding: 10px;
+            font-size: 18px;
+            width: 80px;
+            border-radius: 6px;
+            border: none;
         }
         button {
-            background-color: gold;
-            border: none;
             padding: 12px 24px;
             font-size: 18px;
-            border-radius: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
             margin-top: 20px;
             cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
     <h1>Welcome to Blackjack</h1>
-    <form method="POST">
-        <label for="num_decks">Select number of decks (1–8):</label>
-        <input type="number" name="num_decks" min="1" max="8" required><br>
-        <button type="submit">Continue</button>
+    <form method="POST" action="/setup">
+        <label for="num_decks">Number of Decks (1-8):</label>
+        <br><br>
+        <input type="number" name="num_decks" min="1" max="8" value="1" required>
+        <br><br>
+        <button type="submit">Start Game</button>
     </form>
 </body>
 </html>

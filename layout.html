@@ -2,49 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Blackjack</title>
+    <title>Blackjack Game</title>
     <style>
         body {
-            background: linear-gradient(to bottom right, #1e1e2f, #3c3c5c);
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
             color: white;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 30px;
             text-align: center;
-            padding: 20px;
         }
-        h1, h2 {
-            color: #FFD700;
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
         }
-        .card-box {
-            background-color: #222;
-            padding: 15px;
-            margin: 10px auto;
-            border-radius: 12px;
-            width: fit-content;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-        }
-        input, button {
-            padding: 10px;
-            border-radius: 8px;
-            border: none;
-            font-size: 18px;
-        }
-        button {
-            background-color: #FFD700;
+        .card {
+            display: inline-block;
+            background: white;
             color: black;
-            cursor: pointer;
-            margin-left: 12px;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 10px;
+            font-size: 1.5em;
         }
-        .credit {
-            position: fixed;
-            bottom: 8px;
-            left: 8px;
-            font-size: 20px;
-            color: #aaa;
+        .btn {
+            padding: 12px 25px;
+            margin: 10px;
+            font-size: 1.2em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        input[type="number"] {
+            padding: 10px;
+            font-size: 1.2em;
+            border-radius: 6px;
+        }
+        .container {
+            max-width: 700px;
+            margin: auto;
+            background-color: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
         }
     </style>
 </head>
 <body>
-    {% block content %}{% endblock %}
-    <div class="credit">Made by Can Ortanç & ChatGPT</div>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
 </body>
 </html>

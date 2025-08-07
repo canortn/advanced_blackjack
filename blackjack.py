@@ -88,7 +88,72 @@ def game():
         allow_double=allow_double
     )
 
-@app.route("/hit")
+def get_hand_value(hand):
+    total = 0
+    aces = 0
+    for card in hand:
+        if card in ['J', 'Q', 'K']:
+            total += 10
+        elif card == 'A':
+            total += 11
+            aces += 1
+        else:
+            total += int(card)
+
+    # Adjust Aces from 11 to 1 if busting
+    while total > 21 and aces:
+        total -= 10
+        aces -= 1
+
+    return total
+
+
+@app.route("/action", methods=["POST"])
+def action():
+    move = request.form["move"]
+    shoe = session.get("shoe", [])
+    player_hand = session.get("player_hand", [])
+    dealer_hand = session.get("dealer_hand", [])
+    bet = session.get("bet", 0)
+    original_bet = session.get("original_bet", bet // 2)
+
+    if move == "hit":
+        player_hand.append(shoe.pop())
+        session["player_hand"] = player_hand
+        session["shoe"] = shoe
+
+        # ✅ Check for bust after hit
+        if calculate_score(player_hand) > 21:
+            return redirect(url_for("stand"))
+
+    elif move == "stand":
+        # Dealer draws until score >= 17
+        while calculate_score(dealer_hand) < 17:
+            dealer_hand.append(shoe.pop())
+        session["dealer_hand"] = dealer_hand
+        session["shoe"] = shoe
+        return redirect(url_for("result"))
+
+    elif move == "double":
+        if session["balance"] >= bet:
+            session["doubled"] = True
+            session["balance"] -= bet
+            session["bet"] += bet
+            session["original_bet"] = original_bet
+            player_hand.append(shoe.pop())
+            session["player_hand"] = player_hand
+            session["shoe"] = shoe
+
+            # ✅ Check for bust after double
+            if calculate_score(player_hand) > 21:
+                return redirect(url_for("stand"))
+
+        return redirect(url_for("stand"))
+
+    return redirect(url_for("game"))
+
+
+@app.route("/stand", methods=["POST"])
 def hit():
     shoe = session.get("shoe", [])
     player_hand = session.get("player_hand", [])
@@ -104,7 +169,7 @@ def hit():
 
     return redirect("/game")
 
-@app.route("/stand")
+@app.route("/stand", methods=["GET", "POST"])
 def stand():
     shoe = session.get("shoe", [])
     dealer_hand = session.get("dealer_hand", [])
@@ -117,7 +182,7 @@ def stand():
 
     return redirect("/result")
 
-@app.route("/double")
+@app.route("/stand", methods=["POST"])
 def double():
     shoe = session.get("shoe", [])
     player_hand = session.get("player_hand", [])
@@ -143,34 +208,42 @@ def result():
     original_bet = session.get("original_bet", bet // 2)
     balance = session.get("balance", 0)
     doubled = session.get("doubled", False)
-    shoe = session.get("shoe", [])
-    num_decks = session.get("num_decks", 1)
 
     player_score = calculate_score(player_hand)
     dealer_score = calculate_score(dealer_hand)
 
-    total_card_counts = Counter(card_faces * 4 * num_decks)
-    current_card_counts = Counter(shoe)
-
-    # Outcome logic
+    result_msg = ""
+    
     if player_score > 21:
         result_msg = "You busted! Dealer wins."
-        balance -= original_bet * 2 if doubled else original_bet
+        balance -= bet  # Lose full bet
     elif dealer_score > 21 or player_score > dealer_score:
         if len(player_hand) == 2 and player_score == 21 and not doubled:
             result_msg = "Blackjack! You win 2.5x your bet!"
             balance += int(original_bet * 2.5)
         else:
             result_msg = "You win!"
-            balance += original_bet * 4 if doubled else original_bet * 2
+            if doubled:
+                balance += 4 * original_bet  # +2x original bet
+            else:
+                balance += bet  # normal win
     elif dealer_score == player_score:
         result_msg = "Push. It's a tie!"
-        balance += original_bet * 2 if doubled else original_bet
+        if doubled:
+            balance += 2 * original_bet  # return full double
+        else:
+            balance += bet  # return original
     else:
         result_msg = "Dealer wins!"
-        balance -= original_bet * 2 if doubled else original_bet
+        balance -= bet  # full bet lost (double or not)
 
     session["balance"] = max(balance, 0)
+
+    # Also return card counts for display
+    shoe = session.get("shoe", [])
+    num_decks = session.get("num_decks", 1)
+    total_card_counts = Counter(card_faces * 4 * num_decks)
+    current_card_counts = Counter(shoe)
 
     return render_template(
         "result.html",

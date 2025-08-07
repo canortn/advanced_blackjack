@@ -1,0 +1,35 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="game-container">
+    <h1 class="section-title">Your Hand</h1>
+    <div class="cards">
+        {% for card in player_hand %}
+            <div class="card">{{ card }}</div>
+        {% endfor %}
+    </div>
+    <p>Total: {{ player_total }}</p>
+
+    <h2 class="section-title">Dealer Shows</h2>
+    <div class="cards">
+        <div class="card">{{ dealer_card }}</div>
+    </div>
+
+    <div class="actions">
+        <form method="post" action="{{ url_for('action') }}">
+            {% if allow_double %}
+                <button type="submit" name="move" value="double" class="btn btn-green">Double</button>
+            {% endif %}
+            <button type="submit" name="move" value="hit" class="btn btn-green">Hit</button>
+            <button type="submit" name="move" value="stand" class="btn btn-green">Stand</button>
+        </form>
+    </div>
+
+    <h2 class="section-title">Remaining Cards</h2>
+    <p>
+        {% for card in card_counts %}
+            {{ card }}: {{ card_counts[card] }} / {{ total_card_counts[card] }}
+            {% if not loop.last %} | {% endif %}
+        {% endfor %}
+    </p>
+{% endblock %}

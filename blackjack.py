@@ -88,6 +88,7 @@ def game():
         allow_double=allow_double
     )
 
+
 def get_hand_value(hand):
     total = 0
     aces = 0
@@ -111,49 +112,33 @@ def get_hand_value(hand):
 @app.route("/action", methods=["POST"])
 def action():
     move = request.form["move"]
-    shoe = session.get("shoe", [])
     player_hand = session.get("player_hand", [])
-    dealer_hand = session.get("dealer_hand", [])
-    bet = session.get("bet", 0)
-    original_bet = session.get("original_bet", bet // 2)
+    shoe = session.get("shoe", [])
+    double_down = session.get("double_down", False)
+    bet = session.get("bet", 1000)
 
     if move == "hit":
         player_hand.append(shoe.pop())
         session["player_hand"] = player_hand
-        session["shoe"] = shoe
-
-        # ✅ Check for bust after hit
         if calculate_score(player_hand) > 21:
-            return redirect(url_for("stand"))
-
-    elif move == "stand":
-        # Dealer draws until score >= 17
-        while calculate_score(dealer_hand) < 17:
-            dealer_hand.append(shoe.pop())
-        session["dealer_hand"] = dealer_hand
-        session["shoe"] = shoe
-        return redirect(url_for("result"))
+            return redirect(url_for("result"))
+        return redirect(url_for("hit"))
 
     elif move == "double":
-        if session["balance"] >= bet:
-            session["doubled"] = True
-            session["balance"] -= bet
-            session["bet"] += bet
-            session["original_bet"] = original_bet
-            player_hand.append(shoe.pop())
-            session["player_hand"] = player_hand
-            session["shoe"] = shoe
+        if not double_down:
+            session["double_down"] = True
+            #session["bet"] = bet * 2  # Double it ONCE
+        #player_hand.append(shoe.pop())
+        session["player_hand"] = player_hand
+        return redirect(url_for("double"))
 
-            # ✅ Check for bust after double
-            if calculate_score(player_hand) > 21:
-                return redirect(url_for("stand"))
-
+    elif move == "stand":
         return redirect(url_for("stand"))
 
     return redirect(url_for("game"))
 
 
-@app.route("/stand", methods=["POST"])
+@app.route("/hit", methods=["GET", "POST"])
 def hit():
     shoe = session.get("shoe", [])
     player_hand = session.get("player_hand", [])
@@ -182,21 +167,23 @@ def stand():
 
     return redirect("/result")
 
-@app.route("/stand", methods=["POST"])
+@app.route("/double", methods=["GET", "POST"])
 def double():
     shoe = session.get("shoe", [])
     player_hand = session.get("player_hand", [])
     bet = session.get("bet", 0)
     balance = session.get("balance", 0)
 
-    if len(player_hand) == 2 and balance >= bet:
+    if  balance >= bet:
         player_hand.append(shoe.pop())
         session["player_hand"] = player_hand
         session["shoe"] = shoe
         session["bet"] = bet * 2
-        session["balance"] = balance - bet
+        #session["balance"] = balance - bet * 2
         session["doubled"] = True
+        print(session)
         return redirect("/stand")
+        
 
     return redirect("/game")
 
@@ -204,57 +191,45 @@ def double():
 def result():
     player_hand = session.get("player_hand", [])
     dealer_hand = session.get("dealer_hand", [])
-    bet = session.get("bet", 0)
-    original_bet = session.get("original_bet", bet // 2)
-    balance = session.get("balance", 0)
-    doubled = session.get("doubled", False)
+    bet = session.get("bet", 1000)
+    balance = session.get("balance", 10000)
 
-    player_score = calculate_score(player_hand)
-    dealer_score = calculate_score(dealer_hand)
+    player_total = calculate_score(player_hand)
+    dealer_total = calculate_score(dealer_hand)
 
-    result_msg = ""
-    
-    if player_score > 21:
-        result_msg = "You busted! Dealer wins."
-        balance -= bet  # Lose full bet
-    elif dealer_score > 21 or player_score > dealer_score:
-        if len(player_hand) == 2 and player_score == 21 and not doubled:
-            result_msg = "Blackjack! You win 2.5x your bet!"
-            balance += int(original_bet * 2.5)
-        else:
-            result_msg = "You win!"
-            if doubled:
-                balance += 4 * original_bet  # +2x original bet
-            else:
-                balance += bet  # normal win
-    elif dealer_score == player_score:
-        result_msg = "Push. It's a tie!"
-        if doubled:
-            balance += 2 * original_bet  # return full double
-        else:
-            balance += bet  # return original
+    # Default outcome
+    outcome = ""
+
+    if player_total > 21:
+        outcome = "You busted! You lose."
+        balance -= bet
+
+    elif dealer_total > 21:
+        outcome = "Dealer busted! You win!"
+        balance += bet
+
+    elif player_total > dealer_total:
+        outcome = "You win!"
+        balance += bet
+
+    elif player_total < dealer_total:
+        outcome = "You lose."
+        balance -= bet
+
     else:
-        result_msg = "Dealer wins!"
-        balance -= bet  # full bet lost (double or not)
+        outcome = "Push! It's a tie."
 
-    session["balance"] = max(balance, 0)
-
-    # Also return card counts for display
-    shoe = session.get("shoe", [])
-    num_decks = session.get("num_decks", 1)
-    total_card_counts = Counter(card_faces * 4 * num_decks)
-    current_card_counts = Counter(shoe)
+    # Save updated balance
+    session["balance"] = balance
 
     return render_template(
         "result.html",
+        outcome=outcome,
         player_hand=player_hand,
         dealer_hand=dealer_hand,
-        player_total=player_score,
-        dealer_total=dealer_score,
-        balance=session["balance"],
-        result=result_msg,
-        card_counts=current_card_counts,
-        total_card_counts=total_card_counts
+        player_total=player_total,
+        dealer_total=dealer_total,
+        balance=balance
     )
 
 @app.route("/restart")

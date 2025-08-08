@@ -28,8 +28,9 @@
     <h2 class="section-title">Remaining Cards</h2>
     <p>
         {% for card in card_counts %}
-            {{ card }}: {{ card_counts[card] }} / {{ total_card_counts[card] }}
+            {{ card }}: {{ card_counts[card] }}/{{ total_card_counts[card] }}
             {% if not loop.last %} | {% endif %}
         {% endfor %}
     </p>
+</div>
 {% endblock %}
